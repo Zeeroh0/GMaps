@@ -13,7 +13,7 @@ class Marker extends React.Component {
         (this.props.location !== prevProps.location)
       )) {
       (this.marker) && (this.marker.setMap(null));
-      this.calcAddress();
+      this.calcAddressCoords();
     }
   }
 
@@ -23,7 +23,7 @@ class Marker extends React.Component {
     }
   }
 
-  calcAddress() {
+  calcAddressCoords() {
     const { google, mapCenter, location } = this.props;
     const geocoder = new google.maps.Geocoder();
     const pos = location || mapCenter;    

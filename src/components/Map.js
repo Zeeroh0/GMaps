@@ -8,9 +8,10 @@ import { camelize } from '../helperFunctions/functions';
 class Map extends React.Component {
   state = {
     currentLocation: {
-      lat: this.props.initialCenter.lat,
-      lng: this.props.initialCenter.lng
-    }
+      lat: null,
+      lng: null
+    },
+    zoom: this.props.zoom,
   }
 
   componentDidMount() {
@@ -28,13 +29,13 @@ class Map extends React.Component {
         });
       }
     }
-    this.loadMap();
+    this.calcMapCenter(this.props.initialCenter);
   }
 
   componentDidUpdate(prevProps, prevState) {
     // When the google api is loaded and passed down as a prop, load the map
     if (prevProps.google !== this.props.google) {
-      this.loadMap();
+      this.calcMapCenter(this.props.initialCenter);
     }
     // If the state's location changes, recenter the map
     if (prevState.currentLocation !== this.state.currentLocation) {
@@ -42,7 +43,66 @@ class Map extends React.Component {
     }
   }
 
-  loadMap() {
+  calcMapCenter(location) {
+    const { google } = this.props;
+    const { currentLocation } = this.state;
+    const geocoder = new google.maps.Geocoder();
+
+    const showGeoLocation = (results) => {
+      results.length > 5 && showDefaultMap();
+      const coords = results[0].geometry.location;
+      const loc = { lat: coords.lat(), lng: coords.lng() };
+      const zoom = 18;
+      this.setState({ 
+        currentLocation: loc,
+        zoom,
+      }, this.loadMap(loc, zoom));
+    };
+
+    const showCoordLocation = () => {
+      const zoom = 18;
+      this.setState({
+        currentLocation: location,
+        zoom,
+      }, this.loadMap(location, zoom));
+    };
+
+    const showDefaultMap = () => {
+      const middleOfUSA = { lat: 39.8283, lng: -98.5795 };
+      const zoom = 4;
+      this.setState(
+        { currentLocation: middleOfUSA, zoom },
+        this.loadMap(middleOfUSA, zoom)
+      );
+    };
+
+    if (typeof location === 'string') {
+      geocoder.geocode({ 'address': location }, (results, status) => {
+        
+        
+        // if (status === 'OK') { showGeoLocation(results) }
+        // else {
+        //   if (!currentLocation.lat || currentLocation.lng) {
+        //     showDefaultMap();
+        //   }
+        //   if (currentLocation.lat && currentLocation.lng) return;
+        // }
+
+
+        (status === 'OK') ? showGeoLocation(results) :
+        (!currentLocation.lat || currentLocation.lng) ? showDefaultMap() :
+        (currentLocation.lat && currentLocation.lng) && null;
+
+
+      });
+    } else if (typeof location === 'object') {
+      showCoordLocation();
+    } else {
+      alert('where even are we??');
+    }
+  }
+
+  loadMap(location, zoomLevel) {
     if (this.props && this.props.google) {
       // google is available
       const { google } = this.props;
@@ -50,13 +110,16 @@ class Map extends React.Component {
 
       const mapRef = this.refs.map;
       const node = ReactDOM.findDOMNode(mapRef);
+      debugger;
 
-      let { zoom } = this.props;
-      let { lat, lng } = this.state.currentLocation;
-      const center = new maps.LatLng(lat, lng);
+      let loc, zoom;
+      location ? loc = location : loc = this.state.currentLocation;
+      zoomLevel ? zoom = zoomLevel : zoom = this.state.zoom;
+
+      const center = new maps.LatLng(loc.lat, loc.lng);
       const mapConfig = Object.assign({}, {
-        center: center,
-        zoom: zoom
+        center,
+        zoom
       });
       this.map = new maps.Map(node, mapConfig);
       this.setState(this.state);
@@ -92,13 +155,13 @@ class Map extends React.Component {
 
   recenterMap() {
     const map = this.map;
-    const curr = this.state.currentLocation;
+    const current = this.state.currentLocation;
 
     const google = this.props.google;
     const maps = google.maps;
 
     if (map) {
-      let center = new maps.LatLng(curr.lat, curr.lng);
+      let center = new maps.LatLng(current.lat, current.lng);
       map.panTo(center);
     }
   }
@@ -133,12 +196,14 @@ class Map extends React.Component {
 };
 
 Map.defaultProps = {
-  zoom: 13,
-  // San Francisco
-  initialCenter: {
+  zoom: 1,
+  initialCenter: 
+  // 'adsfadsfasdf',
+  {
     lat: 37.774929,
     lng: -122.419416
   },
+  // USA { lat: 39.8283, lng: -98.5795 },
   centerAroundCurrenLocation: false,
   onMove: function() { console.log('Moved the Google Map!') },
   onReady: function() { console.log('Google Map API is loaded') }
