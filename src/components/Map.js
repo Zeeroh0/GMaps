@@ -1,23 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+
 import '../App.css'
 import { camelize } from '../helperFunctions/functions';
 
 
-
 class Map extends React.Component {
-  // constructor(props) {
-  //   super(props);
-
-  //   const { lat, lng } = this.props.initialCenter;
-  //   this.state = {
-  //     currentLocation: {
-  //       lat: lat,
-  //       lng: lng
-  //     }
-  //   }
-  // }
-
   state = {
     currentLocation: {
       lat: this.props.initialCenter.lat,
@@ -26,6 +14,7 @@ class Map extends React.Component {
   }
 
   componentDidMount() {
+    // If we turn it on, we can center the map off the user's browser location
     if (this.props.centerAroundCurrenLocation) {
       if (navigator && navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(pos => {
@@ -43,16 +32,17 @@ class Map extends React.Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
+    // When the google api is loaded and passed down as a prop, load the map
     if (prevProps.google !== this.props.google) {
       this.loadMap();
     }
+    // If the state's location changes, recenter the map
     if (prevState.currentLocation !== this.state.currentLocation) {
       this.recenterMap();
     }
   }
 
   loadMap() {
-    debugger;
     if (this.props && this.props.google) {
       // google is available
       const { google } = this.props;
@@ -61,7 +51,7 @@ class Map extends React.Component {
       const mapRef = this.refs.map;
       const node = ReactDOM.findDOMNode(mapRef);
 
-      let { initialCenter, zoom } = this.props;
+      let { zoom } = this.props;
       let { lat, lng } = this.state.currentLocation;
       const center = new maps.LatLng(lat, lng);
       const mapConfig = Object.assign({}, {
@@ -69,6 +59,7 @@ class Map extends React.Component {
         zoom: zoom
       });
       this.map = new maps.Map(node, mapConfig);
+      this.setState(this.state);
 
       // Set up event handlers
       const evtNames = ['click', 'move', 'ready', 'dragend'];
@@ -78,7 +69,7 @@ class Map extends React.Component {
 
       // force the trigger of the onReady prop (if passed down)
       maps.event.trigger(this.map, 'ready');
-      this.renderChildren();
+
     }
   }
 
@@ -113,10 +104,10 @@ class Map extends React.Component {
   }
 
   renderChildren() {
-    debugger;
     let { children } = this.props;
     
     if (!children) return;
+
     return React.Children.map(children, child => {
       return React.cloneElement(child, {
         map: this.map,
@@ -126,25 +117,12 @@ class Map extends React.Component {
     });
   }
 
-  // renderChildren() {
-  //   const {children} = this.props;
-
-  //   if (!children) return;
-
-  //   return React.Children.map(children, c => {
-  //     return React.cloneElement(c, {
-  //       map: this.map,
-  //       google: this.props.google,
-  //       mapCenter: this.state.currentLocation
-  //     });
-  //   })
-  // }
-
   render() {
     const style = {
       width: '100vw',
       height: '100vh'
-    }
+    };
+
     return(
       <div ref='map' style={style}>
         Loading map...
@@ -152,16 +130,7 @@ class Map extends React.Component {
       </div>
     );
   }
-}
-
-// Map.propTypes = {
-//   google: React.PropTypes.object,
-//   zoom: React.PropTypes.number,
-//   initialCenter: React.PropTypes.object,
-//   centerAroundCurrenLocation: React.PropTypes.bool,
-//   onMove: React.PropTypes.func,
-//   evtNames.forEact(e => Map.propTypes[camelize(e)] = T.func)
-// }
+};
 
 Map.defaultProps = {
   zoom: 13,
@@ -171,8 +140,8 @@ Map.defaultProps = {
     lng: -122.419416
   },
   centerAroundCurrenLocation: false,
-  onMove: function() { console.log('Default onMove func was called!') },
-  onReady: function() { console.log('Default onReady func was called!') }
-}
+  onMove: function() { console.log('Moved the Google Map!') },
+  onReady: function() { console.log('Google Map API is loaded') }
+};
 
 export default Map;
