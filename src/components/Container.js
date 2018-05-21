@@ -87,18 +87,18 @@ class Container extends React.Component {
         />
         
         {/* Additional examples */}
-        {/* Marker passing in a coordinate object */}
+        {/* Marker passing in a coordinate object 
         <Marker
           location={coordPosition}
           onClick={this.onMarkerClick}
           name={'Dolores Park'}
-        />
-        {/* Marker passing in a string position */}
+        />*/}
+        {/* Marker passing in a string position 
         <Marker
           location={stringPosition}
           name={'String Address'}
           onClick={this.onMarkerClick}
-        />
+        />*/}
 
         <InfoWindow 
           marker={this.state.activeMarker}

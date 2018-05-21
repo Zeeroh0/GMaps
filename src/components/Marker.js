@@ -10,7 +10,8 @@ class Marker extends React.Component {
         (this.props.userMarkerVisible !== prevProps.userMarkerVisible)
       ) && (
         (this.props.map !== prevProps.map) ||
-        (this.props.location !== prevProps.location)
+        (this.props.location !== prevProps.location) ||
+        (this.props.mapCenter !== prevProps.mapCenter)
       )) {
       (this.marker) && (this.marker.setMap(null));
       this.calcAddressCoords();
@@ -26,8 +27,8 @@ class Marker extends React.Component {
   calcAddressCoords() {
     const { google, mapCenter, location } = this.props;
     const geocoder = new google.maps.Geocoder();
-    const pos = location || mapCenter;    
-    
+    const pos = location ? location : mapCenter;
+
     if (typeof pos === 'string') {
       geocoder.geocode({'address': pos}, (results, status) => {
         if (status === 'OK') {
@@ -40,7 +41,7 @@ class Marker extends React.Component {
       });
     } else {
       let locationCoords = new google.maps.LatLng(pos.lat, pos.lng);
-      this.renderMarker(locationCoords);      
+      this.renderMarker(locationCoords);
     }
   }
 

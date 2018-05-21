@@ -78,22 +78,9 @@ class Map extends React.Component {
 
     if (typeof location === 'string') {
       geocoder.geocode({ 'address': location }, (results, status) => {
-        
-        
-        // if (status === 'OK') { showGeoLocation(results) }
-        // else {
-        //   if (!currentLocation.lat || currentLocation.lng) {
-        //     showDefaultMap();
-        //   }
-        //   if (currentLocation.lat && currentLocation.lng) return;
-        // }
-
-
         (status === 'OK') ? showGeoLocation(results) :
         (!currentLocation.lat || currentLocation.lng) ? showDefaultMap() :
         (currentLocation.lat && currentLocation.lng) && null;
-
-
       });
     } else if (typeof location === 'object') {
       showCoordLocation();
@@ -110,7 +97,6 @@ class Map extends React.Component {
 
       const mapRef = this.refs.map;
       const node = ReactDOM.findDOMNode(mapRef);
-      debugger;
 
       let loc, zoom;
       location ? loc = location : loc = this.state.currentLocation;
@@ -199,11 +185,13 @@ Map.defaultProps = {
   zoom: 1,
   initialCenter: 
   // 'adsfadsfasdf',
-  {
-    lat: 37.774929,
-    lng: -122.419416
-  },
-  // USA { lat: 39.8283, lng: -98.5795 },
+  // '100 W Washington Ave, Phoenix, AZ',
+  // {
+  //   lat: 37.774929,
+  //   lng: -122.419416
+  // },
+  // USA
+  { lat: 39.8283, lng: -98.5795 },
   centerAroundCurrenLocation: false,
   onMove: function() { console.log('Moved the Google Map!') },
   onReady: function() { console.log('Google Map API is loaded') }
